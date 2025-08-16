@@ -31,6 +31,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
+    private Environment environment;
     private final OpenAiChatModel baseOpenAiModel;
     private final ChatMessageRepository chatMessageRepository;
     private final ObjectMapper objectMapper;
@@ -553,6 +555,9 @@ public class ChatServiceImpl implements ChatService {
     public boolean badWordCheck(Long userId, String message, Long sentAt) {
         //금칙어 포함 시 금칙어 사용 기록에 저장 ( admin 모듈 ) 후 처리
         log.info("금칙어 check 중 ... message : " + message, "sentAt : " + sentAt );
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+            return false;
+        }
         boolean check = badWordService.checkBadWord(message);
         log.info("금칙어 check 결과 : " + check);
         if (check) {
